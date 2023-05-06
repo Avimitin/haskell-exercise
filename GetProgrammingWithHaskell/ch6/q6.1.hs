@@ -1,0 +1,1 @@
+myRepeat x = cycle [x]
