@@ -8,20 +8,20 @@ parse :: String -> [LogMessage]
 parse file = map parseMessage (lines file)
 
 parseMessage :: String -> LogMessage
-parseMessage = handleMsgSegment . words
+parseMessage = parseLogType . words
 
-handleMsgSegment :: [String] -> LogMessage
-handleMsgSegment ("I" : rest) = parseRestOfTheLog Info rest
-handleMsgSegment ("W" : rest) = parseRestOfTheLog Warning rest
-handleMsgSegment ("E" : rest) = parseErrorLog rest
-handleMsgSegment orig = Unknown (unwords orig)
+parseLogType :: [String] -> LogMessage
+parseLogType ("I" : rest) = parseCommonLog Info rest
+parseLogType ("W" : rest) = parseCommonLog Warning rest
+parseLogType ("E" : rest) = parseErrorLog rest
+parseLogType orig = Unknown (unwords orig)
 
-parseRestOfTheLog :: MessageType -> [String] -> LogMessage
-parseRestOfTheLog _ [] = Unknown "Unreachable"
-parseRestOfTheLog logTyp (digit : rest) = LogMessage logTyp (toInt digit) (unwords rest)
+parseCommonLog :: MessageType -> [String] -> LogMessage
+parseCommonLog _ [] = Unknown "Unreachable"
+parseCommonLog logTyp (timestamp : rest) = LogMessage logTyp (toInt timestamp) (unwords rest)
 
 parseErrorLog :: [String] -> LogMessage
-parseErrorLog (errLevel : digit : rest) = LogMessage (Error (toInt errLevel)) (toInt digit) (unwords rest)
+parseErrorLog (errLevel : timestamp : rest) = LogMessage (Error (toInt errLevel)) (toInt timestamp) (unwords rest)
 parseErrorLog [_] = Unknown "Unreachable"
 parseErrorLog [] = Unknown "Unreachable"
 
